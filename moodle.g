@@ -127,7 +127,7 @@ MoodleMatchingQuestion := function( qrec )
             "<hidden>0<\/hidden>\n",
             "<shuffleanswers>", String( qrec.shuffle ), "<\/shuffleanswers>\n" );
     
-    for ans in qrec.answers do
+    for ans in qrec.subquestions do
         text := Concatenation( text, MoodleSubQuestion( ans ));
     od;
 
@@ -143,6 +143,60 @@ MoodleMatchingQuestion := function( qrec )
 
     return text;
 end;
+
+MoodleMatchingQuestionByFunctions := function( func1, func2, title, qtext, args... )
+
+    local qrec, i, inforec, nrsubquestions;
+    
+    qrec := rec( type := "matching", title := title, qtext := qtext );
+
+    if Length( args ) > 0 then
+        inforec := args[1];
+        
+        if IsBound( inforec.defgrade ) then 
+            qrec.defgrade := inforec.defgrade;
+        else 
+            qrec.defgrade := "1";
+        fi;
+
+        if IsBound( inforec.penalty ) then 
+            qrec.penalty := inforec.penalty;
+        else 
+            qrec.penalty := "0.1";
+        fi;
+
+        if IsBound( inforec.shuffle ) then 
+            qrec.shuffle := inforec.shuffle;
+        else 
+            qrec.shuffle := "1";
+        fi;
+
+        if IsBound( inforec.nrsubquestions ) then
+            nrsubquestions := inforec.nrsubquestions;
+        else
+            nrsubquestions := 4;
+        fi;
+
+        if IsBound( inforec.tags ) then
+            qrec.tags := inforec.tags;
+        else
+            qrec.tags := [];
+        fi;
+
+    fi;
+    
+    qrec.subquestions := List( [1..nrsubquestions], x-> 
+               [ func1(0) ]);
+    for i in  [1..nrsubquestions] do
+        qrec.subquestions[i][2] := func2( qrec.subquestions[i][1] );
+        qrec.subquestions[i][1] := Concatenation( "\\(", 
+                                    LaTeXObj( qrec.subquestions[i][1] ), "\\)");
+    od;
+
+    return MoodleMatchingQuestion( qrec );
+end;
+
+
 
 
 # Function to create Moodle Questionnaire. The input is a record with fields

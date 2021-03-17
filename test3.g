@@ -145,21 +145,21 @@ end;
 
 Q3 := function()
 
-    local qrec, answers,mats; 
+    local qrec, subquestions,mats; 
 
     repeat 
         mats := List( [1..4], x->RandomMatrix( 2, [-5..5] ));
         mats := Set( mats );
     until Length( mats ) = 4;
 
-    answers := List( [1..4], x->[ Concatenation("\\(",LaTeXObj(mats[x]),"\\)"), 
+    subquestions := List( [1..4], x->[ Concatenation("\\(",LaTeXObj(mats[x]),"\\)"), 
                                   Determinant( mats[x] )]);
 
     qrec := rec(
             title := "Combine com determinante",
             type := "matching",
             qtext := "Combine a matriz com seu determinante", 
-            answers := answers, 
+            subquestions := subquestions, 
             defgrade := "1", 
             penalty := "0.1", 
             shuffle := "1", 
