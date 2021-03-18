@@ -73,3 +73,29 @@ LaTeXMatrix := function( mat )
 
     return str;
 end;
+
+#checks if symmetric matrix is positive definite
+
+IsPositiveDefinite := function( mat )
+    local d, i;
+
+    if TransposedMat( mat ) <> mat then 
+        Error( "matrix must be symmetric" );
+    fi;
+
+    d := NrRows( mat );
+    for i in [1..d] do
+        if Determinant( mat{[1..i]}{[1..i]}) <= 0 then 
+            return false;
+        fi;
+    od;
+
+    return true;
+end;
+
+#checks if matrix has at least k integer eigenvalues
+
+HaskIntegerEigenvalues := function( mat, k )
+
+    return Length( Filtered( Eigenvalues( Rationals, mat ), IsInt )) >= k;
+end;
