@@ -33,12 +33,21 @@ MoodleSubQuestion := function( args... )
         question := args[1]; answer := args[2];
     fi;
 
-    text := Concatenation( "<subquestion format=\"html\">\n", 
-            "<text><![CDATA[<p>",
-            String( question ),
-            "</p>]]><\/text>\n",
-            "<answer><text>", String( answer ), "<\/text><\/answer>\n", 
-            "<\/subquestion>\n" );
+    if question <> "" then 
+
+        text := Concatenation( "<subquestion format=\"html\">\n", 
+                "<text><![CDATA[<p>",
+                String( question ),
+                "</p>]]><\/text>\n",
+                "<answer><text>", String( answer ), "<\/text><\/answer>\n", 
+                "<\/subquestion>\n" );
+    else 
+
+        text := Concatenation( "<subquestion format=\"html\">\n", 
+                "<text><\/text>\n",
+                "<answer><text>", String( answer ), "<\/text><\/answer>\n", 
+                "<\/subquestion>\n" );
+    fi;
 
     return text;
 end;
@@ -144,7 +153,7 @@ MoodleMultipleChoiceQuestionByLists := function( title, qtext, rightanswers,
         else
             mathobj := [];
         fi;
-        
+
     else
         qrec.defgrade := "1";
         qrec.penalty := "0.1";
@@ -242,11 +251,6 @@ MoodleMatchingQuestionByFunctions := function( func1, func2, title, qtext, args.
     if Length( args ) > 0 then
         inforec := args[1];
         
-        if IsBound( inforec.defgrade ) then 
-            qrec.defgrade := inforec.defgrade;
-        else 
-            qrec.defgrade := "1";
-        fi;
 
         if IsBound( inforec.penalty ) then 
             qrec.penalty := inforec.penalty;
@@ -318,3 +322,46 @@ MoodleQuestionnaire := function( qqrec )
 
     return str;
 end;
+
+MoodleMatchingQuestionByLists := function( list1, list2, title, qtext, args... )
+
+    local qrec, i, inforec, nrsubquestions;
+    
+    qrec := rec( type := "matching", title := title, qtext := qtext );
+
+    if Length( args ) > 0 then
+        inforec := args[1];
+        
+        if IsBound( inforec.defgrade ) then 
+            qrec.defgrade := inforec.defgrade;
+        else 
+            qrec.defgrade := "1";
+        fi;
+
+        if IsBound( inforec.penalty ) then 
+            qrec.penalty := inforec.penalty;
+        else 
+            qrec.penalty := "0.1";
+        fi;
+
+        if IsBound( inforec.shuffle ) then 
+            qrec.shuffle := inforec.shuffle;
+        else 
+            qrec.shuffle := "1";
+        fi;
+
+        if IsBound( inforec.tags ) then
+            qrec.tags := inforec.tags;
+        else
+            qrec.tags := [];
+        fi;
+
+    fi;
+
+    qrec.subquestions := List( [1..Length( list1 )], x-> [ Concatenation( "\\(", LaTeXObj( list1[x] ), "\\)"), list2[x]] );
+    Append( qrec.subquestions, List( [Length( list1 )+1 .. Length( list2 )], 
+       x -> [ "", list2[x]] ));     
+
+    return qrec;
+end;
+

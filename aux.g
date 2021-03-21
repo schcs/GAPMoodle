@@ -99,3 +99,5 @@ HaskIntegerEigenvalues := function( mat, k )
 
     return Length( Filtered( Eigenvalues( Rationals, mat ), IsInt )) >= k;
 end;
+
+InstallMethod( LaTeXObj, [IsString], x->x );
