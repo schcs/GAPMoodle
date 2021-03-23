@@ -110,8 +110,9 @@ end;
 
 MoodleMultipleChoiceQuestionByLists := function( title, qtext, rightanswers, 
             wronganswers, args...)
-    local i, qrec, inforec, wrongmarks, rightmarks, substr, nrwronganswers,          
-                nrrightanswers, mathobj;
+    local i, qrec, inforec, wrongmarks, rightmarks, wrongmark, 
+                rightmark,substr, nrwronganswers,          
+                nrrightanswers, mathobj, wrongmarkzero;
 
     qrec := rec( type := "multi", title := title, qtext := qtext );
 
@@ -154,6 +155,12 @@ MoodleMultipleChoiceQuestionByLists := function( title, qtext, rightanswers,
             mathobj := [];
         fi;
 
+        if IsBound( inforec.wrongmarkzero ) then 
+            wrongmarkzero := inforec.wrongmarkzero;
+        else
+            wrongmarkzero := false;
+        fi;
+
     else
         qrec.defgrade := "1";
         qrec.penalty := "0.1";
@@ -165,13 +172,20 @@ MoodleMultipleChoiceQuestionByLists := function( title, qtext, rightanswers,
 
     wrongmarks := [ "-100", "-50", "-33.33333", "-25", "-20" ];
     rightmarks := [ "100", "50", "33.33333", "25", "20" ];
+    rightmark := rightmarks[Length( rightanswers )];
+    
+    if wrongmarkzero = true then
+        wrongmark := 0;
+    else
+        wrongmark := wrongmarks[Length(wronganswers)];
+    fi;
 
     qrec.answers := List( [1..Length(rightanswers)], 
                 x->[ Concatenation( "\\(", LaTeXObj(rightanswers[x]), "\\)"), 
-                rightmarks[Length( rightanswers )]]);
+                rightmark ]);
     Append( qrec.answers,  List( [1..Length(wronganswers)], 
                 x->[ Concatenation( "\\(", LaTeXObj(wronganswers[x]), "\\)" ), 
-                wrongmarks[Length(wronganswers )]]));
+                wrongmark ]));
     
     for i in [1..Length(mathobj)] do
         substr := Concatenation( "XXX", String( i ));
@@ -364,4 +378,3 @@ MoodleMatchingQuestionByLists := function( list1, list2, title, qtext, args... )
 
     return qrec;
 end;
-
