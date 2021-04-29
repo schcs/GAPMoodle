@@ -128,6 +128,11 @@ InstallMethod( LaTeXObj, [ IsList ],
         return str;
     end );
 
+InstallMethod( LaTeXObj, [ IsPerm ], 
+    function( perm )
+
+        return String( perm );
+    end );
         
 
 InnerProductByMatrix := function( v1, v2, A )
