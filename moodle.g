@@ -181,10 +181,10 @@ MoodleMultipleChoiceQuestionByLists := function( title, qtext, rightanswers,
     fi;
 
     qrec.answers := List( [1..Length(rightanswers)], 
-                x->[ Concatenation( "\\(", LaTeXObj(rightanswers[x]), "\\)"), 
+                x->[ rightanswers[x], 
                 rightmark ]);
     Append( qrec.answers,  List( [1..Length(wronganswers)], 
-                x->[ Concatenation( "\\(", LaTeXObj(wronganswers[x]), "\\)" ), 
+                x->[ wronganswers[x], 
                 wrongmark ]));
     
     for i in [1..Length(mathobj)] do
@@ -264,7 +264,6 @@ MoodleMatchingQuestionByFunctions := function( func1, func2, title, qtext, args.
 
     if Length( args ) > 0 then
         inforec := args[1];
-        
 
         if IsBound( inforec.penalty ) then 
             qrec.penalty := inforec.penalty;
@@ -306,6 +305,73 @@ MoodleMatchingQuestionByFunctions := function( func1, func2, title, qtext, args.
     return qrec;
 end;
 
+MoodleShortAnswerQuestionByAnswer := function( title, qtext, answer, args... )
+
+    local qrec, inforec;
+    
+    qrec := rec( type := "shortanswer", title := title, qtext := qtext );
+
+    if Length( args ) > 0 then
+        inforec := args[1];
+    else
+        inforec := rec( );
+    fi;
+
+    if IsBound( inforec.penalty ) then 
+        qrec.penalty := inforec.penalty;
+    else 
+        qrec.penalty := "0.1";
+    fi;
+
+    if IsBound( inforec.tags ) then
+        qrec.tags := inforec.tags;
+    else
+        qrec.tags := [];
+    fi;
+    
+    if IsBound( inforec.defgrade ) then 
+        qrec.defgrade := inforec.defgrade;
+    else 
+        qrec.defgrade := "1";
+    fi;
+
+    qrec.answer := answer; 
+    return qrec;
+end;
+
+MoodleShortAnswerQuestion := function( qrec )
+
+    local text, ans, tag;
+
+    text := Concatenation( "<question type=\"shortanswer\">\n<name format=\"html\">\n",
+            "<text><![CDATA[", qrec.title, "]]><\/text>\n",
+            "</name>\n", 
+            "<questiontext format=\"html\">\n",
+            "<text><![CDATA[<p>", qrec.qtext, "<\/p>]]><\/text>\n",
+            "<\/questiontext>\n",
+            "<defaultgrade>", String( qrec.defgrade ), "<\/defaultgrade>\n", 
+            "<generalfeedback format=\"html\"><text\/><\/generalfeedback>\n",
+            "<penalty>", String( qrec.penalty ), "<\/penalty>\n",
+            "<hidden>0<\/hidden>\n",
+            "<usecase>0<\/usecase>\n", 
+            "<answer fraction=\"100\" format=\"plain_text\"><text>",
+            String( qrec.answer ), "<\/text>\n<\/answer>\n" );
+
+            if IsBound( qrec.tags ) and Length( qrec.tags ) > 0 then 
+                text := Concatenation( text, "<tags>\n" );
+            for tag in qrec.tags do
+                text := Concatenation( text, "<tag>\n<text>", 
+                    tag, "<\/text>\n<\/tag>\n" );
+            od;
+            text := Concatenation( text, "<\/tags>\n" );
+        fi;
+
+        text := Concatenation( text, "q<\/question>\n" );
+
+
+    return text;
+end;
+
 
 # Function to create Moodle Questionnaire. The input is a record with fields
 #       category       name of category under which the questions will appear on Moodle 
@@ -327,6 +393,8 @@ MoodleQuestionnaire := function( qqrec )
             str := Concatenation( str, MoodleMultipleChoiceQuestion( q ));
         elif q.type = "matching" then 
             str := Concatenation( str, MoodleMatchingQuestion( q ));
+        elif q.type = "shortanswer" then 
+            str := Concatenation( str, MoodleShortAnswerQuestion( q ));
         else
             Error( "Question type not implemented" );
         fi;
