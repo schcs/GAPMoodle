@@ -439,7 +439,7 @@ MoodleMatchingQuestionByLists := function( list1, list2, title, qtext, args... )
         fi;
 
     fi;
-
+    
     qrec.subquestions := List( [1..Length( list1 )], x-> [ Concatenation( "\\(", LaTeXObj( list1[x] ), "\\)"), list2[x]] );
     Append( qrec.subquestions, List( [Length( list1 )+1 .. Length( list2 )], 
        x -> [ "", list2[x]] ));     
